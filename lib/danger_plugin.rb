@@ -152,13 +152,15 @@ module Danger
         warn other_issues_message(other_issues_count) if other_issues_count > 0
       elsif warnings.count > 0 || errors.count > 0
 
-	        message = "### SwiftLint found issues\n\n".dup      
+	        message = "### SwiftLint found issues\n\n Test".dup      
       	if display_only_count
 	  		# Report only Warning or error count
-	  		message << "\n#{Warnings(warning_count)}" if warning_count > 0
-	 	    message << "\n#{Errors(error_count)}" if error_count > 0
+	  		message << "Entered"
+	  		message << "\n Warning : #{warning_count}" if warning_count > 0
+	 	    message << "\n Error : #{error_count}" if error_count > 0
       	else 
         	# Report if any warning or error
+        	message << "Show line by line"
     	    message << markdown_issues(warnings, 'Warnings') unless warnings.empty?
         	message << markdown_issues(errors, 'Errors') unless errors.empty?
 		end
