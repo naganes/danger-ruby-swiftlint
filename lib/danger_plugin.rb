@@ -160,9 +160,11 @@ module Danger
 	 	    message << "\n Error : #{error_count}" if error_count > 0
       	else 
         	# Report if any warning or error
-        	message << "Show line by line"
-    	    message << markdown_issues(warnings, 'Warnings') unless warnings.empty?
-        	message << markdown_issues(errors, 'Errors') unless errors.empty?
+        	message << "\n Entered"
+        	message << "\n Warning : #{warning_count}" if warning_count > 0
+	 	    message << "\n Error : #{error_count}" if error_count > 0
+#    	    message << markdown_issues(warnings, 'Warnings') unless warnings.empty?
+#        	message << markdown_issues(errors, 'Errors') unless errors.empty?
 		end
 		
 		message << "\n#{other_issues_message(other_issues_count)}" if other_issues_count > 0
