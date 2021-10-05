@@ -52,6 +52,9 @@ module Danger
 
     # Whether all issues or ones in PR Diff to be reported
     attr_accessor :filter_issues_in_diff
+    
+    # Display only count
+    attr_accessor :display_only_count
 
     # Lints Swift files. Will fail if `swiftlint` cannot be installed correctly.
     # Generates a `markdown` list of warnings for the prose in a corpus of
@@ -119,6 +122,8 @@ module Danger
 
       @issues = issues
       other_issues_count = 0
+      warning_count = 0
+      error_count = 0
       unless @max_num_violations.nil? || no_comment
         other_issues_count = issues.count - @max_num_violations if issues.count > @max_num_violations
         issues = issues.take(@max_num_violations)
@@ -133,23 +138,33 @@ module Danger
       # Filter warnings and errors
       @warnings = issues.select { |issue| issue['severity'] == 'Warning' }
       @errors = issues.select { |issue| issue['severity'] == 'Error' }
+      
+      warning_count = warnings.count
+      error_count = errors.count
 
       # Early exit so we don't comment
       return if no_comment
 
-      if inline_mode
+	  if inline_mode
         # Report with inline comment
         send_inline_comment(warnings, strict ? :fail : :warn)
         send_inline_comment(errors, (fail_on_error || strict) ? :fail : :warn)
         warn other_issues_message(other_issues_count) if other_issues_count > 0
       elsif warnings.count > 0 || errors.count > 0
-        # Report if any warning or error
-        message = "### SwiftLint found issues\n\n".dup
-        message << markdown_issues(warnings, 'Warnings') unless warnings.empty?
-        message << markdown_issues(errors, 'Errors') unless errors.empty?
-        message << "\n#{other_issues_message(other_issues_count)}" if other_issues_count > 0
-        markdown message
 
+	        message = "### SwiftLint found issues\n\n".dup      
+      	if display_only_count
+	  		# Report only Warning or error count
+	  		message << "\n#{Warnings(warning_count)}" if warning_count > 0
+	 	    message << "\n#{Errors(error_count)}" if error_count > 0
+      	else 
+        	# Report if any warning or error
+    	    message << markdown_issues(warnings, 'Warnings') unless warnings.empty?
+        	message << markdown_issues(errors, 'Errors') unless errors.empty?
+		end
+		
+		message << "\n#{other_issues_message(other_issues_count)}" if other_issues_count > 0
+		markdown message
         # Fail danger on errors
         should_fail_by_errors = fail_on_error && errors.count > 0
         # Fail danger if any warnings or errors and we are strict
